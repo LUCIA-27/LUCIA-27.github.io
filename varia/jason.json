@@ -1,0 +1,138 @@
+{
+	"conveyors": [
+		{
+			"conv1": {
+				"convtype": "straight",
+				"tagname": "straight1",
+				"belt": {
+					"tagname": "belt1",
+					"material": {
+						"materialName": "conv1_material",
+						"material_definition": "MeshLambertMaterial",
+						"material_mode": {
+							"opacity": 0.1,
+							"transparent": true,
+							"wireframe": "cs_wireframe"
+						},
+						"friction": "CornerSlipperyInvers",
+						"restitution": "ConveyorRestitution"
+					},
+					"physijs": {
+						"Mesh": "BoxMesh",
+						"Geometry": "CubeGeometry",
+						"Dimensions": {
+							"Length": 36.0,
+							"Height": "ConveyorHeight",
+							"Width": 6.0
+						},
+						"Material": "conv1_material",
+						"Mass": 0
+					},
+					"material.color": {
+						"set": "setRGB",
+						"x": "Math.random() * 100 / 100",
+						"y": "Math.random() * 100 / 100",
+						"y": "Math.random() * 100 / 100"
+					},
+					"_physijs.collision_flags": -1,
+					"collision_comment": "CF_STATIC_OBJECT",
+					"Shadow": {
+						"receiveShadow": true,
+						"castShadow": true
+					},
+					".position.set": {
+						"x": -0.0,
+						"y": 1.5,
+						"y": -20.0
+					}
+				},
+				"guardRail": {
+					"tagname": "rail_1R",
+					"material": {
+						"materialName": "rail_1R_material",
+						"material_definition": "MeshLambertMaterial",
+						"material_mode": {
+							"opacity": 0.1,
+							"transparent": true,
+							"wireframe": "cs_wireframe"
+						},
+						"friction": 0.0,
+						"restitution": 0.9
+					},
+					"physijs": {
+						"Mesh": "BoxMesh",
+						"Geometry": "CubeGeometry",
+						"Dimensions": {
+							"Length": 32.0,
+							"Height": "RailHeight",
+							"Width": 1.0
+						},
+						"Material": "rail_1R_material",
+						"Mass": 0
+					},
+					"material.color": {
+						"set": "setRGB",
+						"x": "Math.random() * 100 / 100",
+						"y": "Math.random() * 100 / 100",
+						"y": "Math.random() * 100 / 100"
+					},
+					"_physijs.collision_flags": -1,
+					"collision_comment": "CF_STATIC_OBJECT",
+					"Shadow": {
+						"receiveShadow": true,
+						"castShadow": true
+					},
+					".position.set": {
+						"x": -0.0,
+						"y": 1.5,
+						"z": -20.0,
+						"z_shift": 3.5
+					}
+				},
+				"guardRail": {
+					"tagname": "rail_1L",
+					"material": {
+						"materialName": "rail_1R_material",
+						"material_definition": "MeshLambertMaterial",
+						"material_mode": {
+							"opacity": 0.1,
+							"transparent": true,
+							"wireframe": "cs_wireframe"
+						},
+						"friction": 0.0,
+						"restitution": 0.9
+					},
+					"physijs": {
+						"Mesh": "BoxMesh",
+						"Geometry": "CubeGeometry",
+						"Dimensions": {
+							"Length": 32.0,
+							"Height": "RailHeight",
+							"Width": 1.0
+						},
+						"Material": "rail_1R_material",
+						"Mass": 0
+					},
+					"material.color": {
+						"set": "setRGB",
+						"x": "Math.random() * 100 / 100",
+						"y": "Math.random() * 100 / 100",
+						"y": "Math.random() * 100 / 100"
+					},
+					"_physijs.collision_flags": -1,
+					"collision_comment": "CF_STATIC_OBJECT",
+					"Shadow": {
+						"receiveShadow": true,
+						"castShadow": true
+					},
+					".position.set": {
+						"x": -0.0,
+						"y": 1.5,
+						"z": -20.0,
+						"z_shift": -3.5
+					}
+				}
+			}
+		}
+	]
+}

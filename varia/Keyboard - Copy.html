@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Keyboard Input (Three.js)</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel=stylesheet href="css/base.css"/>
+</head>
+<body>
+
+<script src="js/Three.js"></script>
+<script src="js/Detector.js"></script>
+<script src="js/Stats.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script src="js/KeyboardState.js"></script>
+<script src="js/THREEx.FullScreen.js"></script>
+<script src="js/THREEx.WindowResize.js"></script>
+
+<script type="text/javascript" src="js/physi.js"></script>
+
+
+
+<!-- Code to display an information button and box when clicked. -->
+<script src="js/jquery-1.9.1.js"></script>
+<script src="js/jquery-ui.js"></script>
+<link rel=stylesheet href="css/jquery-ui.css" />
+<link rel=stylesheet href="css/info.css"/>
+<script src="js/info.js"></script>
+<div id="infoButton"></div>
+<div id="infoBox" title="Demo Information">
+Controls: Press A/D to move continuously, press LEFT/RIGHT to move in discrete jumps,
+and press R to change color (will return to original color when key is released).
+<br/><br/>
+This three.js demo is part of a collection at
+<a href="http://stemkoski.github.io/Three.js/">http://stemkoski.github.io/Three.js/</a>
+</div>
+<!-- ------------------------------------------------------------ -->
+
+<div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
+<script>
+
+       
+        'use strict';
+        
+        Physijs.scripts.worker = 'js/physijs_worker.js';
+        Physijs.scripts.ammo = 'ammo.js';
+
+
+
+/*
+        Three.js "tutorials by example"
+        Author: Lee Stemkoski
+        Date: August 2013 (three.js v60)
+*/
+
+// MAIN
+
+// standard global variables
+var container, scene, camera, renderer, controls, stats;
+var clock = new THREE.Clock();
+
+var keyboard = new KeyboardState();
+
+
+// cs ---------------------
+
+var ground, ground_material;
+
+var transport;
+
+var pause;
+
+// custom global variables
+var mesh;
+
+init();
+// transport();
+animate();
+
+// FUNCTIONS                 
+function init()
+{
+        // SCENE
+        // scene = new THREE.Scene();
+		
+		// ---- cs
+		
+		scene = new Physijs.Scene;
+				
+        scene.setGravity(new THREE.Vector3( 0, -50, 0 )); // -30 -50 -40 -50
+
+		
+		
+        // CAMERA
+        var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+        var VIEW_ANGLE = 35, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+        camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+        scene.add(camera);
+        camera.position.set( 40, 10, 40 );
+        camera.lookAt(scene.position);        
+        // RENDERER
+        if ( Detector.webgl )
+                renderer = new THREE.WebGLRenderer( {antialias:true} );
+        else
+                renderer = new THREE.CanvasRenderer();
+        renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+        container = document.getElementById( 'ThreeJS' );
+        container.appendChild( renderer.domElement );
+        // EVENTS
+        THREEx.WindowResize(renderer, camera);
+        THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
+        // CONTROLS
+        controls = new THREE.OrbitControls( camera, renderer.domElement );
+        // STATS
+        stats = new Stats();
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.bottom = '0px';
+        stats.domElement.style.zIndex = 100;
+        container.appendChild( stats.domElement );
+        // LIGHT
+        var light = new THREE.PointLight(0xffffff);
+        light.position.set(100,250,100);
+        scene.add(light);
+        // FLOOR
+        var floorTexture = new THREE.ImageUtils.loadTexture( 'images/plant_floor_grid.jpg' );
+        floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
+        floorTexture.repeat.set( 10, 10 );
+        var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
+        var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
+        var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.position.y = -0.5;
+        floor.rotation.x = Math.PI / 2;
+ scene.add(floor);
+        // SKYBOX
+        var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
+        var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
+        var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
+     //   scene.add(skyBox);
+        
+        ////////////
+        // CUSTOM //
+        ////////////
+        
+		/*
+        var geometry = new THREE.SphereGeometry( 30, 32, 16 );
+        var material = new THREE.MeshLambertMaterial( { color: 0x0000ff } );
+        mesh = new THREE.Mesh( geometry, material );
+        mesh.position.set(0,40,0);
+        scene.add(mesh);
+        */
+		
+
+	//
+		
+		plant_floor();
+
+		transport();
+		
+		
+		}
+		
+function plant_floor()
+{
+
+                // Materials
+                ground_material = Physijs.createMaterial(
+                        new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'images/plant_floor.jpg' ) }),
+                        .9, // friction
+                        .9  // restitution
+                );
+				
+                ground_material.map.wrapS = ground_material.map.wrapT = THREE.RepeatWrapping;
+                ground_material.map.repeat.set( 2.5, 2.5 );
+                
+                // Ground
+                ground = new Physijs.BoxMesh(
+                         new THREE.CubeGeometry(50, 1, 50),
+                         //new THREE.PlaneGeometry(50, 50),
+                         ground_material,
+                         0 // mass
+                );
+				
+                ground.receiveShadow = true;
+                scene.add( ground );
+                
+                // Bumpers
+                var bumper,
+                    bumper_geom = new THREE.CubeGeometry( 2.0, 1.0, 50.0
+				);
+                
+                bumper = new Physijs.BoxMesh( bumper_geom, ground_material, 0, { restitution: .2 } );
+                bumper.position.y = 1;
+                bumper.position.x = -24;
+                bumper.receiveShadow = true;
+                bumper.castShadow = true;
+                scene.add( bumper );
+                
+                bumper = new Physijs.BoxMesh( bumper_geom, ground_material, 0, { restitution: .2 } );
+                bumper.position.y = 1;
+                bumper.position.x = 24;
+                bumper.receiveShadow = true;
+                bumper.castShadow = true;
+                scene.add( bumper );
+                
+                bumper = new Physijs.BoxMesh( bumper_geom, ground_material, 0, { restitution: .2 } );
+                bumper.position.y = 1;
+                bumper.position.z = -24;
+                bumper.rotation.y = Math.PI / 2;
+                bumper.receiveShadow = true;
+                bumper.castShadow = true;
+                scene.add( bumper );
+                
+                bumper = new Physijs.BoxMesh( bumper_geom, ground_material, 0, { restitution: .2 } );
+                bumper.position.y = 1;
+                bumper.position.z = 24;
+                bumper.rotation.y = Math.PI / 2;
+                bumper.receiveShadow = true;
+                bumper.castShadow = true;
+                scene.add( bumper );
+
+				
+
+
+}
+		
+function transport()
+{
+
+
+        // --- conveyor_n --- //
+		
+		var LineSpeed = 8;
+				
+		var ConveyorHeight = 1.0;
+		
+		var ConveyorRestitution = 0.4;
+
+		var CornerSlipperyInvers = 0.5;
+				 
+		var CornerBrakeIntensity = 0.8;
+		
+//			console.log (" pause ist1" + pause );
+		
+	
+    document.addEventListener("keydown", function(event) {
+    var code = event.which || event.keyCode;
+	
+	console.log ( "Key " + code );
+	
+	if (code == 37) left( );  // left arrow
+    if (code == 39) right(); // right arrow
+    if (code == 65) camera = above_cam; // A
+    if (code == 69) camera = earth_cam; // E
+    if (code == 77) camera = earth_cam; // M
+    if (code == 80) pause = !pause // P
+    if (code == 49) speed =  1; // 1
+    if (code == 50) speed =  2; // 2
+    if (code == 51) speed = 10; // 3
+    ///////////////////////////////////////event.preventDefault();
+	
+		console.log (" pause ist 2" + pause );
+		
+    return false;
+	});
+
+
+			
+		// --- conveyor_1 --- straight //				
+		var conv1_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					.9,   // friction
+					ConveyorRestitution    // restitution
+		);
+		var conv1 = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 31.0, ConveyorHeight, 6.0 ), //27.8
+					conv1_material,
+					0        // mass                         
+		);				
+		conv1_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		conv1.receiveShadow = true;
+        conv1.castShadow = true;
+		conv1.position.set( -0.0, 1.5, -16.0);
+		
+				
+		// --- guard rail 1R
+		var rail_1R_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					.0,   // friction
+					.9    // restitution
+		);
+		var rail_1R = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 28.0, ConveyorHeight+1, 1.0 ), 
+		            rail_1R_material,
+		            0.0 // mass                  
+		);
+		rail_1R_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		rail_1R.receiveShadow = true;
+		rail_1R.castShadow = true;			
+		rail_1R.position.set( -0.0, 1.5, -16.0 +3.5 );
+		
+		// --- guard rail 1L
+		var rail_1L_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					.0,   // friction
+					.9    // restitution
+		);
+		var rail_1L = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 28.0, ConveyorHeight+1, 1.0 ), 
+		            rail_1L_material,
+		            0.0 // mass                  
+		);
+		rail_1L_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		rail_1L.receiveShadow = true;
+		rail_1L.castShadow = true;			
+		rail_1L.position.set( -0.0, 1.5, -16.0 -3.5 );
+				
+		// --- conveyor_2 --- corner //
+		var conv2_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					CornerSlipperyInvers,   // friction
+					ConveyorRestitution    // restitution
+		);
+		var conv2 = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 8.0, ConveyorHeight, 8.0 ), 
+					conv2_material,
+				    0.0 // mass              
+		);
+		conv2_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		conv2.receiveShadow = true;
+		conv2.castShadow = true;
+		conv2.position.set( 18.0, 1.5, -16.0 );		
+				
+		// --- guard rail 2XL
+		var rail_2XL_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					.0,   // friction
+					.9    // restitution
+		);
+		var rail_2XL = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 1.0, ConveyorHeight+1, 8.0 ), 
+		            rail_2XL_material,
+		            0.0 // mass                  
+		);
+		rail_2XL_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		rail_2XL.receiveShadow = true;
+		rail_2XL.castShadow = true;			
+		rail_2XL.position.set( 22.5, 1.5, -16.0 );
+										
+		// --- guard rail 2YR
+		var rail_2YR_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					.0,   // friction
+					.9    // restitution
+		);
+		var rail_2YR = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 8.0, ConveyorHeight+1, 1.0 ), 
+		            rail_2YR_material,
+		            0.0 // mass                  
+		);
+		rail_2YR_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		rail_2YR.receiveShadow = true;
+		rail_2YR.castShadow = true;			
+		rail_2YR.position.set( 18.0, 1.5, -20.5 );
+				
+		// --- conveyor_3 --- straight  //
+		var conv3_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					CornerSlipperyInvers,   // friction
+					ConveyorRestitution    // restitution
+		);
+		var conv3 = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 6, ConveyorHeight, 28 ), //25.8
+					conv3_material,
+				    0.0 // mass                
+		);
+		conv3_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		conv3.receiveShadow = true;
+		conv3.castShadow = true;	
+		conv3.position.set( 18.0, 1.5, 1.0 );
+		
+		// --- guard rail 3R
+		var rail_3R_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					.0,   // friction
+					.9    // restitution
+		);
+		var rail_3R = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 1.0, ConveyorHeight+1, 26.0 ), 
+		            rail_3R_material,
+		            0.0 // mass                  
+		);
+		rail_3R_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		rail_3R.receiveShadow = true;
+		rail_3R.castShadow = true;			
+		rail_3R.position.set(  18.0 -3.5, 1.5, 1.0 );
+								
+		// --- guard rail 3L
+		var rail_3L_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					.0,   // friction
+					.9    // restitution
+		);
+		var rail_3L = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 1.0, ConveyorHeight+1, 26.0 ), 
+		            rail_3L_material,
+		            0.0 // mass                  
+		);
+		rail_3L_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		rail_3L.receiveShadow = true;
+		rail_3L.castShadow = true;			
+		rail_3L.position.set(  18.0 +3.5, 1.5, 1.0 );
+		
+		// --- conveyor_4 --- corner //
+		var conv4_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					CornerSlipperyInvers,   // friction
+					ConveyorRestitution    // restitution
+		);
+		var conv4 = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 8, ConveyorHeight, 8 ), 
+					conv4_material,
+					0.0 // mass                 
+		);
+		conv4_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		conv4.receiveShadow = true;
+		conv4.castShadow = true;	
+		conv4.position.set( 18.0, 1.5, 18.0 );
+		
+		// --- conveyor_5 --- straight //
+		var conv5_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					CornerSlipperyInvers,   // friction
+					.0    // restitution
+		);
+		var conv5 = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 31, ConveyorHeight, 6 ), 
+		            conv5_material,
+		            0.0 // mass                  
+		);
+		conv5_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		conv5.receiveShadow = true;
+		conv5.castShadow = true;			
+		conv5.position.set( 0, 1.5, 18.0 );
+		
+		// --- guard rail 5R
+		var rail_5R_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					.0,   // friction
+					.9    // restitution
+		);
+		var rail_5R = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 28, ConveyorHeight+1, 1 ), 
+		            rail_5R_material,
+		            0.0 // mass                  
+		);
+		rail_5R_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		rail_5R.receiveShadow = true;
+		rail_5R.castShadow = true;			
+		rail_5R.position.set( 0, 1.5, 18.0 -3.5 );
+		
+		
+		// --- guard rail 5L
+		var rail_5L_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					.0,   // friction
+					.9    // restitution
+		);
+		var rail_5L = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 28, ConveyorHeight+1, 1 ), 
+		            rail_5L_material,
+		            0.0 // mass                  
+		);
+		rail_5L_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		rail_5L.receiveShadow = true;
+		rail_5L.castShadow = true;			
+		rail_5L.position.set( 0, 1.5, 18.0 +3.5 );
+				
+		
+		
+		// --- conveyor_6 --- corner //
+		var conv6_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					CornerSlipperyInvers,   // friction
+					ConveyorRestitution    // restitution
+		);
+		var conv6 = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 8, ConveyorHeight, 8 ), 
+					conv6_material,
+				    0.0 // mass             
+		);
+		conv6_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		conv6.receiveShadow = true;
+		conv6.castShadow = true;			
+		conv6.position.set( -18.0, 1.5, 18.0 );
+	
+		// --- conveyor_7 --- corner //		
+		var conv7_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					CornerSlipperyInvers,   // friction
+					ConveyorRestitution   // restitution
+		);
+		var conv7 = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 6, ConveyorHeight, 28 ), 
+					conv7_material,
+				    0.0 // mass                 
+		);
+		conv7_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		conv7.receiveShadow = true;
+		conv7.castShadow = true;							
+		conv7.position.set( -18.0, 1.5, 1.0 );		
+						
+		// --- guard rail 7R
+		var rail_7R_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					.0,   // friction
+					.9    // restitution
+		);
+		var rail_7R = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 1.0, ConveyorHeight+1, 26.0 ), 
+		            rail_7R_material,
+		            0.0 // mass                  
+		);
+		rail_7R_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		rail_7R.receiveShadow = true;
+		rail_7R.castShadow = true;			
+		rail_7R.position.set( -18.0 +3.5, 1.5, 1.0 );
+		
+								
+		// --- guard rail 7L
+		var rail_7L_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					.0,   // friction
+					.9    // restitution
+		);
+		var rail_7L = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 1.0, ConveyorHeight+1, 26.0 ), 
+		            rail_7L_material,
+		            0.0 // mass                  
+		);
+		rail_7L_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		rail_7L.receiveShadow = true;
+		rail_7L.castShadow = true;			
+		rail_7L.position.set( -18.0 -3.5, 1.5, 1.0 );
+		
+		// --- conveyor_8 --- corner //		
+		var conv8_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
+					CornerSlipperyInvers,   // friction
+					ConveyorRestitution    // restitution
+		);
+		var conv8 = new Physijs.BoxMesh( 
+					new THREE.CubeGeometry( 8, ConveyorHeight, 8 ), 
+					conv8_material,
+				    0.0 // mass               
+		);
+		conv8_material.color.setRGB( Math.random() * 100 / 100, Math.random() * 100 / 100, Math.random() * 100 / 100 );
+		conv8.receiveShadow = true;
+		conv8.castShadow = true;						
+		conv8.position.set( -18.0, 1.5, -16.0 );
+		
+		
+		// --- populate and transport --- //
+		// var transport;
+		// transport = (function() {
+		
+		// console.log ("2   "+LineSpeed)
+		
+				scene.add( conv1 );
+				conv1.setLinearVelocity( new THREE.Vector3( LineSpeed, 0 , 0 ) );	
+				scene.add( rail_1R );
+				scene.add( rail_1L );
+
+				scene.add( conv2 );
+				conv2.setLinearVelocity( new THREE.Vector3( -LineSpeed*CornerBrakeIntensity, 0.0 , LineSpeed ) );	
+				scene.add( rail_2XL );				
+				scene.add( rail_2YR );
+								
+				scene.add( conv3 );
+				conv3.setLinearVelocity( new THREE.Vector3( 0, 0 , LineSpeed ) );	
+			    scene.add( rail_3R );
+			    scene.add( rail_3L );
+				
+				scene.add( conv4 );
+				conv4.setLinearVelocity( new THREE.Vector3( -LineSpeed, 0.0 , -LineSpeed ) );	
+				
+				scene.add( conv5 );
+				conv5.setLinearVelocity( new THREE.Vector3( -LineSpeed, 0 , 0 ) );					
+				scene.add( rail_5R );
+				scene.add( rail_5L );
+				
+				scene.add( conv6 );
+				conv6.setLinearVelocity( new THREE.Vector3( LineSpeed, 0.0 , -LineSpeed ) );	
+
+				scene.add( conv7 );
+				conv7.setLinearVelocity( new THREE.Vector3( 0, 0 , -LineSpeed ) );	
+				scene.add( rail_7R );
+				scene.add( rail_7L );
+				
+				scene.add( conv8 );
+				conv8.setLinearVelocity( new THREE.Vector3( LineSpeed, 0.0 , LineSpeed ) );	
+				
+				// --- KISTEN GROSS --- //				
+				
+				// --- kiste_n --- //
+				/*
+													
+				var kiste1_material = Physijs.createMaterial(
+					new THREE.MeshNormalMaterial(),
+                        .5, // friction
+                        .0  // restitution
+                );
+			
+				
+				var kiste_1;				
+				kiste_1 = new Physijs.BoxMesh(
+			          new THREE.CubeGeometry( 3.5, 3.5, 3.5 ),
+			          //new THREE.MeshNormalMaterial()
+					  kiste1_material,
+								 3.0 // mass  
+				);
+				kiste_1.position.set( -9,  8.5, -16 );
+				kiste_1.receiveShadow = true;
+                kiste_1.castShadow = true;
+				scene.add( kiste_1 );		
+				
+
+																	
+				var kiste2_material = Physijs.createMaterial(
+					new THREE.MeshNormalMaterial(),
+                        .5, // friction
+                        .0  // restitution
+                );
+			
+				
+				var kiste_2;				
+				kiste_2 = new Physijs.BoxMesh(
+			          new THREE.CubeGeometry( 3, 3, 3 ),
+			          //new THREE.MeshNormalMaterial()
+					  kiste2_material,
+								 3.0 // mass 
+		        );
+				kiste_2.position.set( 8.0, 8.5, 18);	
+				kiste_2.receiveShadow = true;
+                kiste_2.castShadow = true;				
+				scene.add( kiste_2 );	
+
+													
+				var kiste3_material = Physijs.createMaterial(
+					new THREE.MeshNormalMaterial(),
+                         .5, // friction
+                        .0  // restitution
+                );
+			
+			
+				var kiste_3;				
+				kiste_3 = new Physijs.BoxMesh(
+			          new THREE.CubeGeometry( 3, 3, 3 ),
+			          // new THREE.MeshNormalMaterial()
+					  kiste3_material,
+								 3.0 // mass 
+			    );
+				kiste_3.position.set( 18, 8.5, -8);
+				kiste_3.receiveShadow = true;
+                kiste_3.castShadow = true;
+				scene.add( kiste_3 );						
+				*/
+				
+				// --- KISTEN KLEIN --- //				
+				
+				// --- kiste_n --- //
+				// /*
+													
+				var kiste1_material = Physijs.createMaterial(
+					new THREE.MeshNormalMaterial(),
+                        .5, // friction
+                        .0  // restitution
+                );
+			
+				
+				var kiste_1;				
+				kiste_1 = new Physijs.BoxMesh(
+			          new THREE.CubeGeometry( 4, 3, 2 ),
+			          //new THREE.MeshNormalMaterial()
+					  kiste1_material,
+								 1 // mass  
+				);
+				kiste_1.position.set( -9,  8.5, -16 );
+				scene.add( kiste_1 );		
+				
+
+																	
+				var kiste2_material = Physijs.createMaterial(
+					new THREE.MeshNormalMaterial(),
+                        .5, // friction
+                        .0  // restitution
+                );
+			
+				
+				var kiste_2;				
+				kiste_2 = new Physijs.BoxMesh(
+			          new THREE.CubeGeometry( 1.5, 1, 1.5 ),
+			          //new THREE.MeshNormalMaterial()
+					  kiste2_material,
+								 1 // mass 
+		        );
+				kiste_2.position.set( 8.0, 8.5, -16);		
+				scene.add( kiste_2 );	
+
+													
+				var kiste3_material = Physijs.createMaterial(
+					new THREE.MeshNormalMaterial(),
+                         .5, // friction
+                        .0  // restitution
+                );
+			
+			
+				var kiste_3;				
+				kiste_3 = new Physijs.BoxMesh(
+			          new THREE.CubeGeometry( 1, 1, 6 ),
+			          // new THREE.MeshNormalMaterial()
+					  kiste3_material,
+								 1 // mass 
+			    );
+				kiste_3.position.set( 18, 8.5, -8);
+				scene.add( kiste_3 );						
+				
+												
+				var kiste4_material = Physijs.createMaterial(
+					new THREE.MeshNormalMaterial(),
+                         .5, // friction
+                        .0  // restitution
+                );
+			
+			
+				var kiste_4;				
+				kiste_4 = new Physijs.BoxMesh(
+			          new THREE.CubeGeometry( 3, 3, 3 ),
+			          // new THREE.MeshNormalMaterial()
+					  kiste4_material,
+								 1 // mass 
+			    );
+				kiste_4.position.set( 18, 8.5, 0);
+				scene.add( kiste_4 );						
+				
+												
+				var kiste5_material = Physijs.createMaterial(
+					new THREE.MeshNormalMaterial(),
+                         .5, // friction
+                        .0  // restitution
+                );
+			
+			
+				var kiste_5;				
+				kiste_5 = new Physijs.BoxMesh(
+			          new THREE.CubeGeometry( 1.5, 1, 1.5 ),
+			          // new THREE.MeshNormalMaterial()
+					  kiste5_material,
+								 1 // mass 
+			    );
+				kiste_5.position.set( 18, 8.5, 8);
+				scene.add( kiste_5 );						
+											
+					
+					
+				var kiste6_material = Physijs.createMaterial(
+					new THREE.MeshNormalMaterial(),
+                         .5, // friction
+                        .0  // restitution
+                );
+			
+			
+				var kiste_6;				
+				kiste_6 = new Physijs.BoxMesh(
+			          new THREE.CubeGeometry( 4, 4, 4 ),
+			          // new THREE.MeshNormalMaterial()
+					  kiste6_material,
+								 1 // mass 
+			    );
+				kiste_6.position.set( 10, 8.5, 18);
+				scene.add( kiste_6 );						
+																			
+		// kiste_7
+		var block_7_material;
+		block_7_material = Physijs.createMaterial(
+			new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'images/box_plywood.jpg' ), ambient: 0xFFFFFF }),
+			.5, // friction
+			.0 //  restitution
+		);
+		block_7_material.map.wrapS = block_7_material.map.wrapT = THREE.RepeatWrapping;
+		block_7_material.map.repeat.set( 1, .5 );
+
+				var kiste_7;				
+				kiste_7 = new Physijs.BoxMesh(
+			          new THREE.CubeGeometry( 3, 2.5, 2 ),
+			          // new THREE.MeshNormalMaterial()
+					  block_7_material,
+								 1 // mass 
+			    );
+				kiste_7.position.set( -18.0, 8.5, 10 );
+				kiste_7.receiveShadow = true;
+				kiste_7.castShadow = true;		
+				scene.add( kiste_7 );						
+																		
+																			
+		// kiste_8
+		var block_8_material;
+		block_8_material = Physijs.createMaterial(
+			new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture( 'images/teac.jpg' ), ambient: 0xFFFFFF }),
+			.5, // friction
+			.0 //  restitution
+		);
+		block_8_material.map.wrapS = block_8_material.map.wrapT = THREE.RepeatWrapping;
+		block_8_material.map.repeat.set( 1, .5 );
+
+				var kiste_8;				
+				kiste_8 = new Physijs.BoxMesh(
+			          new THREE.CubeGeometry( 2.5,  1.5, 2.5 ),
+			          // new THREE.MeshNormalMaterial()
+					  block_8_material,
+								 1 // mass 
+			    );
+				kiste_8.position.set( -18.0, 8.5, -8);
+				kiste_8.receiveShadow = true;
+				kiste_8.castShadow = true;		
+				scene.add( kiste_8 );						
+																		
+
+				
+				
+				
+//		});	// transport	
+	
+		}   ;	// transport	
+	
+		/* ==============================================================*/
+		
+function animate()
+{
+    requestAnimationFrame( animate );
+        render();                
+        update();
+}
+/*
+render = function() {
+				scene.simulate(); // run physics
+				renderer.render( scene, camera); // render the scene
+				requestAnimationFrame( render );
+				render_stats.update();
+				};
+*/
+
+
+function update()
+{
+        keyboard.update();
+
+        var moveDistance = 50 * clock.getDelta();
+
+        if ( keyboard.down("left") )
+                mesh.translateX( -50 );
+                
+        if ( keyboard.down("right") )
+                mesh.translateX( 50 );
+
+        if ( keyboard.pressed("A") )
+                mesh.translateX( -moveDistance );
+                
+        if ( keyboard.pressed("D") )
+                mesh.translateX( moveDistance );
+                
+        if ( keyboard.down("R") )
+                mesh.material.color = new THREE.Color(0xff0000);
+        if ( keyboard.up("R") )
+                mesh.material.color = new THREE.Color(0x0000ff);
+                
+        controls.update();
+        stats.update();
+}
+
+function render()
+{
+
+		scene.simulate(); // run physics
+
+        renderer.render( scene, camera );
+}
+
+</script>
+
+</body>
+</html>
