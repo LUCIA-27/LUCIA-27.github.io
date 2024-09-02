@@ -23,8 +23,8 @@
 <script type="text/javascript"> //GUI mit workshop chrome experiments dataarts dat.GUI
 /*
 var gui_controls = new function() {
-        this.conveyorSpeed = 7.5;
-        this.conv_1_Speed = 7.5;
+        this.conveyorSpeed = 5.0;
+        this.conv_1_Speed = 5.0;
         }
 var gui = new dat.GUI();
         gui.add(gui_controls, 'conveyorSpeed',-10.0,10.0);
@@ -108,7 +108,7 @@ gravity = -50 ;  // -9.81 auf fünfache g Richtung abwärts, damit höhere Reibu
         orb_controls = new THREE.OrbitControls( camera, renderer.domElement );
 		
         // stats
-        stats = new Stats();												// anklicken der Statistik wechselt zwischen FPS (frames per second)und ms (Aufrufabstand)
+        stats = new Stats();												// anklicken der Statistik wechselt zwischen FPS (frames per second) und ms (Aufrufabstand)
         stats.domElement.style.position = 'absolute';						// optimal sind zur Zeit etwa 59 bis 60 FPS (bzw. ca. 17ms)
         stats.domElement.style.bottom = '0px';
         stats.domElement.style.zIndex = 100;
@@ -150,8 +150,8 @@ gravity = -50 ;  // -9.81 auf fünfache g Richtung abwärts, damit höhere Reibu
         var conv_2_pause = false;
 		
 		var Line = {
-				Speed : 7.5 ,             //  Förderbänder Geschwindigkeit
-				Speed_upd :7.5
+				Speed : 5.0 ,             //  Förderbänder Geschwindigkeit
+				Speed_upd : 5.0
 				}
 		
 		var ConveyorHeight = 1.0 ;
@@ -169,8 +169,8 @@ gravity = -50 ;  // -9.81 auf fünfache g Richtung abwärts, damit höhere Reibu
 
 		//GUI mit workshop chrome experiments dataarts dat.GUI		
 		var gui_controls = new function() {
-        this.conveyorSpeed = 7.5;
-        this.conv_1_Speed = 7.5;
+        this.conveyorSpeed = 5.0;
+        this.conv_1_Speed = 5.0;
         }
 	
 		var gui = new dat.GUI();
@@ -1132,7 +1132,7 @@ function animate()
         render();               // scene.simulate = run physics und renderer.render( scene, camera );		
 	    orb_controls.update();	// Orbit mit Maus / Pad / etc.
       //gui_controls.update();  // GUI nicht 		
-        stats.update();			// Statistik FPD bzw. ms
+        stats.update();			// Statistik FPS bzw. ms
 		update();				// Steuerungslogik
 }
 

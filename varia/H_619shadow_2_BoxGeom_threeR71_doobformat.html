@@ -176,8 +176,8 @@ var cs_wireframe = true;                // Förderbänder "transparent"
 //GUI mit workshop chrome experiments dataarts dat.GUI		
 var gui_controls = new function() {
         
-	this.conveyorSpeed = 7.5;
-	this.conv_1_Speed = 7.5;
+	this.conveyorSpeed = 5.0;
+	this.conv_1_Speed = 5.0;
         
 }
 	
@@ -1145,7 +1145,7 @@ function animate()
 	render();               // scene.simulate = run physics und renderer.render( scene, camera );		
 	    orb_controls.update();	// Orbit mit Maus / Pad / etc.
       //gui_controls.update();  // GUI nicht 		
-	stats.update();			// Statistik FPD bzw. ms
+	stats.update();			// Statistik FPS bzw. ms
 	update();				// Steuerungslogik
 
 }
