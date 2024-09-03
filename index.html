@@ -67,7 +67,8 @@ var conv2_photocell_E_Collision ;
 
 var gravity;
 gravity = -50 ;  // -9.81 auf fünfache g Richtung abwärts, damit höhere Reibung auf den Förderbändern entsteht ! 
- 
+
+	    // scene
 		scene = new Physijs.Scene;
         scene.setGravity(new THREE.Vector3( 0, gravity, 0 ));       //  -9.81  -30.0  -40.0  -50.0
 
@@ -137,7 +138,6 @@ gravity = -50 ;  // -9.81 auf fünfache g Richtung abwärts, damit höhere Reibu
         // floor
 
         // skybox
-
 // 
 // 
 				//	ground
@@ -184,29 +184,29 @@ gravity = -50 ;  // -9.81 auf fünfache g Richtung abwärts, damit höhere Reibu
 //	
 				//	conveyor
                 //		material
-				// var conv_material ;
+				//  var conv_material ;
 				//		material Normal
-				//conv_material = new THREE.MeshNormalMaterial();
+				//  conv_material = new THREE.MeshNormalMaterial();
 				
 				//		material Lambert
-				 //*
+				//*
 				var conv_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true, wireframe : cs_wireframe }),
-									ConveyorFriction,   // friction
+									ConveyorFriction,      // friction
 									ConveyorRestitution    // restitution
 				);
 				//*/
 				
 				//	rail
                 //		material
-				// var rail_material ;
+				//  var rail_material ;
 				//		material Normal
-				// rail_material = new THREE.MeshNormalMaterial();
+				//  rail_material = new THREE.MeshNormalMaterial();
 				
 				//		material Lambert
-				 //*
+				//*
 				var rail_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
-								ConveyorFriction,   // friction
-								ConveyorRestitution    // restitution
+									ConveyorFriction,      // friction
+									ConveyorRestitution    // restitution
 				);
 				//*/
 		
@@ -493,7 +493,7 @@ gravity = -50 ;  // -9.81 auf fünfache g Richtung abwärts, damit höhere Reibu
 		//		conveyor_6		corner //
 		var conv6_material = Physijs.createMaterial(new THREE.MeshLambertMaterial({ opacity: 1, transparent: true }),
 					CornerSlipperyInvers,   // friction
-					ConveyorRestitution    // restitution
+					ConveyorRestitution     // restitution
 		);
 		var conv6 = new Physijs.BoxMesh( 
 					new THREE.CubeGeometry( 8, ConveyorHeight, 8 ), 
