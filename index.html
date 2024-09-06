@@ -1119,8 +1119,8 @@
 		
 		// kiste_14
 		var block_14_material;
-		block_14_material = Physijs.createMaterial(
-			new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture('images/checkerboard.jpg'), ambient: 0xFFFFFF }),
+		block_12_material = Physijs.createMaterial(
+			new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture('images/wood.jpg'), ambient: 0xFFFFFF }),
 			.5, // friction
 			.0 //  restitution
 		);
@@ -1372,7 +1372,7 @@
 				kiste_11.applyCentralImpulse(_v3);
 				kiste_12.applyCentralImpulse(_v3);
 				kiste_13.applyCentralImpulse(_v3);
-				kiste_13.applyCentralImpulse(_v3);
+				kiste_14.applyCentralImpulse(_v3);
 			}
 
 			if (keyboard.pressed("4")) {
