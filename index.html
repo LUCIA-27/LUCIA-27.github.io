@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-	<title>PRIVATE Halle_4-1-619 website</title>
+	<title>PRIVATE Halle_4-1-619 PRIVATE website</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<link rel=stylesheet href="css/base.css">
@@ -929,7 +929,7 @@
 			block_4_material,
 			1.0 // mass 
 		);
-		kiste_4.position.set(20.0, 8.5, 0.0);
+		kiste_4.position.set(20., 8.5, 0.0);
 		kiste_4.receiveShadow = true;
 		kiste_4.castShadow = true;
 		scene.add(kiste_4);
@@ -1070,7 +1070,7 @@
 			1.0 // mass 
 		);
 		kiste_11.name = "kiste_11"
-		kiste_11.position.set(22.0, 48.5, 0.0);
+		kiste_11.position.set(21.0, 128.5, 0.0);
 		kiste_11.receiveShadow = true;
 		kiste_11.castShadow = true;
 		scene.add(kiste_11);
@@ -1091,7 +1091,7 @@
 			1 // mass 
 		);
 		kiste_12.name = "kiste_12"
-		kiste_12.position.set(22.0, 148.5, -2.0);
+		kiste_12.position.set(21.0, 168.5, -2.0);
 		kiste_12.receiveShadow = true;
 		kiste_12.castShadow = true;
 		scene.add(kiste_12);
@@ -1112,52 +1112,10 @@
 			1 // mass 
 		);
 		kiste_13.name = "kiste_13"
-		kiste_13.position.set(20.0, 248.5, -4.0);
+		kiste_13.position.set(20.0, 208.5, -4.0);
 		kiste_13.receiveShadow = true;
 		kiste_13.castShadow = true;
 		scene.add(kiste_13);
-		
-		// kiste_14
-		var block_14_material;
-		block_14_material = Physijs.createMaterial(
-			new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture('images/wood.jpg'), ambient: 0xFFFFFF }),
-			.5, // friction
-			.0 //  restitution
-		);
-		block_14_material.map.wrapS = block_10_material.map.wrapT = THREE.RepeatWrapping;
-		block_14_material.map.repeat.set(1, .5);
-		var kiste_14;
-		kiste_14 = new Physijs.BoxMesh(
-			new THREE.CubeGeometry(1.0, 5.5, 0.35),
-			block_14_material,
-			1.0 // mass 
-		);
-		kiste_14.name = "kiste_14"
-		kiste_14.position.set(20.0, 268.5, -6.0);
-		kiste_14.receiveShadow = true;
-		kiste_14.castShadow = true;
-		scene.add(kiste_14);
-
-// kiste_15
-		var block_15_material;
-		block_15_material = Physijs.createMaterial(
-			new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture('images/wood.jpg'), ambient: 0xFFFFFF }),
-			.5, // friction
-			.0 //  restitution
-		);
-		block_15_material.map.wrapS = block_10_material.map.wrapT = THREE.RepeatWrapping;
-		block_15_material.map.repeat.set(1, .5);
-		var kiste_15;
-		kiste_15 = new Physijs.BoxMesh(
-			new THREE.CubeGeometry(1.0, 5.5, 0.35),
-			block_15_material,
-			1.0 // mass 
-		);
-		kiste_15.name = "kiste_15"
-		kiste_15.position.set(20.0, 278.5, -7.0);
-		kiste_15.receiveShadow = true;
-		kiste_15.castShadow = true;
-		scene.add(kiste_15);
 
 		/* ==============================================================*/
 		/* Test für mitfahrende Kamera                                   */
@@ -1212,8 +1170,6 @@
 				kiste_11.applyCentralImpulse(_v3);
 				kiste_12.applyCentralImpulse(_v3);
 				kiste_13.applyCentralImpulse(_v3);
-				kiste_14.applyCentralImpulse(_v3);
-				kiste_15.applyCentralImpulse(_v3);
 				Line.Speed_upd = gui_controls.conveyorSpeed;  // update 
 				console.log(gui_controls.conveyorSpeed);
 			}
@@ -1263,8 +1219,7 @@
 						kiste_11.applyCentralImpulse(_v3);
 						kiste_12.applyCentralImpulse(_v3);
 						kiste_13.applyCentralImpulse(_v3);
-						kiste_14.applyCentralImpulse(_v3);
-						kiste_15.applyCentralImpulse(_v3);
+
 						conv1.setLinearVelocity(new THREE.Vector3(Line.Speed, 0, 0));
 						//conv1_material.opacity = 1 ;
 						//conv1_material.color = new THREE.Color(0x0000ff)					
@@ -1328,8 +1283,7 @@
 					kiste_11.applyCentralImpulse(_v3);
 					kiste_12.applyCentralImpulse(_v3);
 					kiste_13.applyCentralImpulse(_v3);
-					kiste_14.applyCentralImpulse(_v3);
-					kiste_15.applyCentralImpulse(_v3);
+
 					conv1.setLinearVelocity(new THREE.Vector3(Line.Speed, 0, 0));
 					//conv1_material.opacity = 1 ;
 					//conv1_material.color = new THREE.Color(0x0000ff)
@@ -1364,8 +1318,7 @@
 					kiste_11.applyCentralImpulse(_v3);
 					kiste_12.applyCentralImpulse(_v3);
 					kiste_13.applyCentralImpulse(_v3);
-					kiste_14.applyCentralImpulse(_v3);
-					kiste_15.applyCentralImpulse(_v3);
+
 					conv2.setLinearVelocity(new THREE.Vector3(-Line.Speed * CornerBrakeIntensity, 0.0, Line.Speed));
 					//conv2_material.opacity = 1 ;
 					//conv2_material.color = new THREE.Color(0x0000ff)
@@ -1397,8 +1350,6 @@
 				kiste_11.applyCentralImpulse(_v3);
 				kiste_12.applyCentralImpulse(_v3);
 				kiste_13.applyCentralImpulse(_v3);
-				kiste_14.applyCentralImpulse(_v3);
-				kiste_15.applyCentralImpulse(_v3);
 			}
 
 			if (keyboard.pressed("4")) {
@@ -1424,8 +1375,7 @@
 					kiste_11.applyCentralImpulse(_v3);
 					kiste_12.applyCentralImpulse(_v3);
 					kiste_13.applyCentralImpulse(_v3);
-					kiste_14.applyCentralImpulse(_v3);
-					kiste_15.applyCentralImpulse(_v3);
+
 				}
 			}
 		} // update
