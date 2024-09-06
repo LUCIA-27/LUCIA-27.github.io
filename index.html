@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-	<title>PRIVATE Halle_4-1-619 PRIVATE website</title>
+	<title>PRIVATE Halle_4-1-619 website</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<link rel=stylesheet href="css/base.css">
@@ -1116,6 +1116,27 @@
 		kiste_13.receiveShadow = true;
 		kiste_13.castShadow = true;
 		scene.add(kiste_13);
+		
+		// kiste_14
+		var block_14_material;
+		block_14_material = Physijs.createMaterial(
+			new THREE.MeshLambertMaterial({ map: THREE.ImageUtils.loadTexture('images/checkerboard.jpg'), ambient: 0xFFFFFF }),
+			.5, // friction
+			.0 //  restitution
+		);
+		block_14_material.map.wrapS = block_14_material.map.wrapT = THREE.RepeatWrapping;
+		block_14_material.map.repeat.set(3, 1);
+		var kiste_14;
+		kiste_14 = new Physijs.BoxMesh(
+			new THREE.CylinderGeometry(0.8, 0.8, 5.5, 16),
+			block_14_material,
+			1 // mass 
+		);
+		kiste_14.name = "kiste_14"
+		kiste_14.position.set(20.0, 248.5, -6.0);
+		kiste_14.receiveShadow = true;
+		kiste_14.castShadow = true;
+		scene.add(kiste_14);
 
 		/* ==============================================================*/
 		/* Test für mitfahrende Kamera                                   */
@@ -1170,6 +1191,7 @@
 				kiste_11.applyCentralImpulse(_v3);
 				kiste_12.applyCentralImpulse(_v3);
 				kiste_13.applyCentralImpulse(_v3);
+				kiste_14.applyCentralImpulse(_v3);
 				Line.Speed_upd = gui_controls.conveyorSpeed;  // update 
 				console.log(gui_controls.conveyorSpeed);
 			}
@@ -1219,7 +1241,7 @@
 						kiste_11.applyCentralImpulse(_v3);
 						kiste_12.applyCentralImpulse(_v3);
 						kiste_13.applyCentralImpulse(_v3);
-
+						kiste_14.applyCentralImpulse(_v3);
 						conv1.setLinearVelocity(new THREE.Vector3(Line.Speed, 0, 0));
 						//conv1_material.opacity = 1 ;
 						//conv1_material.color = new THREE.Color(0x0000ff)					
@@ -1283,7 +1305,7 @@
 					kiste_11.applyCentralImpulse(_v3);
 					kiste_12.applyCentralImpulse(_v3);
 					kiste_13.applyCentralImpulse(_v3);
-
+					kiste_14.applyCentralImpulse(_v3);
 					conv1.setLinearVelocity(new THREE.Vector3(Line.Speed, 0, 0));
 					//conv1_material.opacity = 1 ;
 					//conv1_material.color = new THREE.Color(0x0000ff)
@@ -1318,7 +1340,7 @@
 					kiste_11.applyCentralImpulse(_v3);
 					kiste_12.applyCentralImpulse(_v3);
 					kiste_13.applyCentralImpulse(_v3);
-
+					kiste_14.applyCentralImpulse(_v3);
 					conv2.setLinearVelocity(new THREE.Vector3(-Line.Speed * CornerBrakeIntensity, 0.0, Line.Speed));
 					//conv2_material.opacity = 1 ;
 					//conv2_material.color = new THREE.Color(0x0000ff)
@@ -1350,6 +1372,7 @@
 				kiste_11.applyCentralImpulse(_v3);
 				kiste_12.applyCentralImpulse(_v3);
 				kiste_13.applyCentralImpulse(_v3);
+				kiste_13.applyCentralImpulse(_v3);
 			}
 
 			if (keyboard.pressed("4")) {
@@ -1374,6 +1397,7 @@
 					kiste_10.applyCentralImpulse(_v3);
 					kiste_11.applyCentralImpulse(_v3);
 					kiste_12.applyCentralImpulse(_v3);
+					kiste_13.applyCentralImpulse(_v3);
 					kiste_13.applyCentralImpulse(_v3);
 
 				}
